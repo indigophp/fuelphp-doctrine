@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Fuel\Doctrine;
+namespace Fuel\Doctrine;
 
 use Indigo\Fuel\Dependency\Container as DiC;
 use Doctrine\Common\Annotations\CachedReader;
@@ -412,57 +412,6 @@ class Manager
 	}
 
 	/**
-	 * Detects component type from name
-	 *
-	 * @param string $componentName
-	 *
-	 * @return string
-	 */
-	protected function detectComponentType($componentName)
-	{
-		if (\Package::loaded($componentName))
-		{
-			return 'package';
-		}
-		elseif (\Module::loaded($componentName))
-		{
-			return 'module';
-		}
-
-		return false;
-	}
-
-	/**
-	 * Returns a path based on component type
-	 *
-	 * @param string $componentName
-	 * @param string $componentType
-	 *
-	 * @return string
-	 */
-	public function getComponentPath($componentName, $componentType = 'app')
-	{
-		switch ($componentType)
-		{
-			case 'package':
-				return \Package::exists($componentName);
-				break;
-
-			case 'module':
-				return \Module::exists($componentName);
-				break;
-
-			case 'app':
-				return APPPATH;
-				break;
-
-			default:
-				return false;
-				break;
-		}
-	}
-
-	/**
 	 * Detects which metadata driver to use for the supplied directory
 	 *
 	 * @param string       $dir        A directory path
@@ -504,24 +453,6 @@ class Manager
 		}
 
 		return false;
-	}
-
-	/**
-	 * Detects component namespace
-	 *
-	 * @param string $componentName
-	 * @param string $componentType
-	 *
-	 * @return string
-	 */
-	protected function detectComponentNamespace($componentName, $componentType)
-	{
-		if ($componentType === 'app')
-		{
-			return '';
-		}
-
-		return trim(str_replace(array('_', '-'), '\\', \Inflector::classify($componentName)), '\\') . '\\' . $this->getObjectName();
 	}
 
 	/**

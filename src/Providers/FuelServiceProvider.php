@@ -9,8 +9,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Indigo\Fuel\Doctrine\Providers;
+namespace Fuel\Doctrine\Providers;
 
+use Fuel\Common\Arr;
 use Fuel\Dependency\ServiceProvider;
 use Doctrine\Common\Cache\Cache;
 
@@ -55,23 +56,18 @@ class FuelServiceProvider extends ServiceProvider
 	 */
 	protected $defaultConfig = [];
 
-	public function __construct()
+	/**
+	 * Initializes doctrine
+	 */
+	private function initDoctrine()
 	{
-		\Config::load('doctrine', true);
+		$app = $this->getApp();
 
-		$config = \Config::get('doctrine', []);
-		$this->defaultConfig = \Arr::filter_keys($config, ['managers', 'types'], true);
+		$config = $app->getConfig();
 
-		// We don't have defined managers
-		if ($managers = \Arr::get($config, 'managers', false) and ! empty($managers))
-		{
-			\Config::set('dbal.managers.__default__', []);
-		}
+		$config->load('doctrine', true);
 
-		// if (\Arr::get($manager, 'mapping.auto', false) and count($managers) > 1)
-		// {
-		// 	throw new \LogicException('Auto mapping is only possible if exactly one manager is used.');
-		// }
+		$this->defaultConfig = Arr::filterKeys($config->get('doctrine', []), ['managers', 'types'], true);
 	}
 
 	/**
@@ -79,11 +75,25 @@ class FuelServiceProvider extends ServiceProvider
 	 */
 	public function provide()
 	{
-		$this->register('doctrine.manager', function($dic, $name = '__default__', array $config = [])
-		{
-			$config = array_merge($this->defaultConfig, \Config::get('doctrine.managers.'.$name, []), $config);
+		$this->initDoctrine();
 
-			return $dic->resolve('Indigo\\Fuel\\Doctrine\\Manager', [$config]);
+		$this->register('doctrine.manager', function($context, array $config = [])
+		{
+			if ($context->isMultiton())
+			{
+				$instance = $context->getName() ?: '__default__';
+			}
+			else
+			{
+				$instance = '__default__';
+			}
+
+			$app = $this->getApp();
+			$conf = $app->getConfig();
+
+			$config = array_merge($this->defaultConfig, $conf->get('doctrine.managers.'.$instance, []), $config);
+
+			return $context->resolve('Fuel\\Doctrine\\Manager', [$config]);
 		});
 
 		$this->register('doctrine.metadata.php', function($dic, $paths = [])
@@ -136,5 +146,26 @@ class FuelServiceProvider extends ServiceProvider
 
 		$this->register('doctrine.behavior.tree', 'Gedmo\\Tree\\TreeListener');
 		$this->register('doctrine.behavior.uploadable', 'Gedmo\\Uploadable\\UploadableListener');
+	}
+
+	/**
+	 * Returns the current application
+	 *
+	 * @return \Fuel\Foundation\Application
+	 */
+	private function getApp()
+	{
+		$stack = $this->resolve('requeststack');
+
+		if ($request = $stack->top())
+		{
+			$app = $request->getApplication();
+		}
+		else
+		{
+			$app = $this->resolve('application::__main');
+		}
+
+		return $app;
 	}
 }
