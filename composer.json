@@ -1,0 +1,26 @@
+{
+	"name": "indigophp/fuelphp-doctrine",
+	"description": "FuelPHP Doctrine 2 integration",
+	"license": "MIT",
+	"keywords": ["doctrine2", "fuelphp"],
+	"homepage": "https://indigophp.com",
+	"authors": [
+		{
+			"name": "Márk Sági-Kazár",
+			"email": "mark.sagikazar@gmail.com"
+		}
+	],
+	"require": {
+		"indigophp/fuelphp-dbal": "dev-develop",
+		"indigophp/doctrine-extensions": "dev-develop",
+		"doctrine/orm": "~2.4",
+		"gedmo/doctrine-extensions": "~2.3"
+	},
+	"autoload": {
+		"psr-4": {
+			"Fuel\\Doctrine\\": "src/"
+		}
+	},
+	"prefer-stable": true,
+	"minimum-stability": "dev"
+}
