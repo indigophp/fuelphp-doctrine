@@ -12,7 +12,7 @@
 namespace Fuel\Doctrine\Providers;
 
 use Fuel\Common\Arr;
-use Fuel\Dependency\ServiceProvider;
+use League\Container\ServiceProvider;
 use Doctrine\Common\Cache\Cache;
 
 /**
@@ -23,7 +23,7 @@ use Doctrine\Common\Cache\Cache;
 class FuelServiceProvider extends ServiceProvider
 {
 	/**
-	 * {@inheritdoc}
+	 * @var array
 	 */
 	public $provides = [
 		'doctrine.manager',
@@ -73,7 +73,7 @@ class FuelServiceProvider extends ServiceProvider
 	/**
 	 * {@inheritdoc}
 	 */
-	public function provide()
+	public function register()
 	{
 		$this->initDoctrine();
 
